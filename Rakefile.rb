@@ -1,0 +1,37 @@
+# encoding: UTF-8
+
+require 'rubygems'
+require 'rdoc/task'
+require 'rake/testtask'
+require 'rubygems/package_task'
+
+spec = Gem::Specification.new do |s|
+  s.name       = "nfqueue"
+  s.version    = "1.0.1"
+  s.author     = "Guillaume Delugré"
+  s.email      = "guillaume AT security-labs DOT org"
+  s.homepage   = "http://code.google.com/p/ruby-nfqueue"
+  s.platform   = Gem::Platform::RUBY
+  
+  s.summary    = "nfqueue is a simple wrapper around libnetfilter_queue using FFI."
+  s.description = <<DESC
+nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to very simply intercept and modify network traffic in a Ruby environment. Network packets can either be inspected or modified on-the-fly.
+DESC
+
+  s.files             = FileList[
+    'README', 'COPYING', "{lib}/**/*"
+  ]
+
+  s.require_path      = "lib"
+  s.has_rdoc          = true
+  s.requirements      = "Support for NFQUEUE in your Linux kernel, libnetfilter_queue installed and Ruby FFI"
+
+  s.add_dependency('ffi', '>= 0')
+end
+
+task :default => [:package]
+
+Gem::PackageTask.new(spec) do |pkg|
+  pkg.need_tar = true
+end
+
