@@ -20,7 +20,7 @@ nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to very simpl
 DESC
 
   s.files             = FileList[
-    'README', 'COPYING', "{lib}/**/*"
+    'README', 'COPYING', "{lib}/**/*", "{samples}/**/*"
   ]
 
   s.require_path      = "lib"
