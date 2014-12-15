@@ -3,7 +3,6 @@
 * Description of nfqueue
 
 nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to do some packet filtering very simply in a Ruby environment.
-Network packets can either be inspected or modified on-the-fly.
 
 For example, plugging on the #0 queue:
 

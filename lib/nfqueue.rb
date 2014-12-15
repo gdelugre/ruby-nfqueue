@@ -153,7 +153,13 @@ module Netfilter
   class Queue
     extend FFI::Library
 
-    ffi_lib 'libnetfilter_queue'
+    begin
+        ffi_lib 'libnetfilter_queue'
+    rescue LoadError => exc
+        STDERR.puts(exc.message)
+        STDERR.puts "Please check that libnetfilter_queue is installed on your system."
+        abort
+    end
 
     attach_function 'nfq_open', [], :pointer
     attach_function 'nfq_open_nfnl', [:pointer], :pointer

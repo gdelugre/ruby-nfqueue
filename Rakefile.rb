@@ -12,10 +12,11 @@ spec = Gem::Specification.new do |s|
   s.email      = "guillaume AT security-labs DOT org"
   s.homepage   = "http://code.google.com/p/ruby-nfqueue"
   s.platform   = Gem::Platform::RUBY
+  s.licenses   = [ "GPL" ]
   
   s.summary    = "nfqueue is a simple wrapper around libnetfilter_queue using FFI."
   s.description = <<DESC
-nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to very simply intercept and modify network traffic in a Ruby environment. Network packets can either be inspected or modified on-the-fly.
+nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to very simply intercept and modify network traffic in a Ruby environment.
 DESC
 
   s.files             = FileList[
