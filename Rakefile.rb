@@ -28,6 +28,7 @@ DESC
   s.requirements      = "Support for NFQUEUE in your Linux kernel, libnetfilter_queue installed and Ruby FFI"
 
   s.add_dependency('ffi', '>= 0')
+  s.add_dependency('nfnetlink', '>=0')
 end
 
 task :default => [:package]

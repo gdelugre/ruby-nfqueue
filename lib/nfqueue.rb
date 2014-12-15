@@ -28,6 +28,7 @@
 require 'rubygems'
 require 'ffi'
 require 'socket'
+require 'nfnetlink'
 
 module Netfilter
 
@@ -94,11 +95,25 @@ module Netfilter
         end
 
         #
+        # The name of the interface this packet was received through.
+        #
+        def indev_name
+            get_interface_name(self.indev)
+        end
+
+        #
         # The index of the physical device the queued packet was received via. 
         # If the returned index is 0, the packet was locally generated or the physical input interface is no longer known (ie. POSTROUTING).
         #
         def phys_indev
             Queue.nfq_get_physindev(@nfad)
+        end
+
+        #
+        # The name of the physical interface this packet was received through.
+        #
+        def phys_indev_name
+            get_interface_name(self.phys_indev)
         end
 
         #
@@ -110,11 +125,25 @@ module Netfilter
         end
 
         #
+        # The name of the interface this packet will be routed to.
+        #
+        def outdev_name
+            get_interface_name(self.outdev)
+        end
+
+        #
         # The index of the physical device the queued packet will be sent out. 
         # If the returned index is 0, the packet is destined for localhost or the physical output interface is not yet known (ie. PREROUTING).
         #
         def phys_outdev
             Queue.nfq_get_physoutdev(@nfad)
+        end
+
+        #
+        # The name of the physical interface this packet will be routed to.
+        #
+        def phys_outdev_name
+            get_interface_name(self.phys_outdev)
         end
 
         #
@@ -125,7 +154,8 @@ module Netfilter
             return nil if phw.null?
 
             hw = HardwareAddress.new(phw)
-            hw[:hw_addr][0, hw[:hw_addrlen]]
+            hw_addrlen = [ hw[:hw_addrlen] ].pack('v').unpack('n')[0]
+            hw[:hw_addr].to_ptr.read_bytes(hw_addrlen)
         end
 
         #
@@ -139,9 +169,18 @@ module Netfilter
                     raise QueueError, "nfq_get_payload has failed"
                 end
     
-                @data = pdata.read_pointer.read_string(size)
+                @data = pdata.read_pointer.read_bytes(size)
             else
                 @data
+            end
+        end
+        
+        private
+
+        def get_interface_name(index)
+            iface = Netfilter::Netlink.interfaces[index]
+            if iface
+                iface[:name]
             end
         end
     end
