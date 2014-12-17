@@ -7,7 +7,7 @@ require 'rubygems/package_task'
 
 spec = Gem::Specification.new do |s|
   s.name       = "nfqueue"
-  s.version    = "1.0.3"
+  s.version    = "1.0.4"
   s.author     = "Guillaume Delugré"
   s.email      = "guillaume AT security-labs DOT org"
   s.homepage   = "http://github.com/gdelugre/ruby-nfqueue"
