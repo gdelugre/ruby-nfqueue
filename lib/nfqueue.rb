@@ -62,15 +62,25 @@ module Netfilter
         STOP    = 5
 
         attr_reader :id
+        attr_reader :protocol
         attr_writer :data
 
-        def initialize(nfad) #:nodoc:
+        def initialize(queue, nfad) #:nodoc:
+            @queue = queue
             @nfad = nfad
 
             phdr = Queue.nfq_get_msg_packet_hdr(nfad)
             hdr = Header.new(phdr)
 
             @id = [ hdr[:packet_id] ].pack("N").unpack("V")[0]
+            @protocol = [ hdr[:protocol] ].pack('n').unpack("v")[0]
+        end
+
+        #
+        # The netfilter mark.
+        #
+        def nfmark
+            Queue.nfq_get_nfmark(@nfad)
         end
 
         #
@@ -178,7 +188,7 @@ module Netfilter
         private
 
         def get_interface_name(index)
-            iface = Netfilter::Netlink.interfaces[index]
+            iface = @queue.net_interfaces[index]
             if iface
                 iface[:name]
             end
@@ -232,10 +242,16 @@ module Netfilter
           PACKET = 2
         end
 
+        attr_reader :queue_number
+        attr_reader :net_interfaces
+
         #
         # Creates a new Queue at slot _qnumber_.
         #
         def initialize(qnumber, mode = CopyMode::PACKET)
+            @queue_number = qnumber
+            @net_interfaces = Netfilter::Netlink.interfaces
+
             @conn_handle = Queue.nfq_open
             raise QueueError, "nfq_open has failed" if @conn_handle.null?
 
@@ -290,8 +306,14 @@ module Netfilter
             raise QueueError, "nfq_fd has failed" if fd < 0
 
             io = IO.new(fd)
-            while data = io.sysread(4096)
-                Queue.nfq_handle_packet(@conn_handle, data, data.size)
+            io.autoclose = false
+
+            begin
+                while data = io.sysread(4096)
+                    Queue.nfq_handle_packet(@conn_handle, data, data.size)
+                end
+            ensure
+                io.close
             end
         end
 
@@ -309,14 +331,18 @@ module Netfilter
         #
         def self.create(qnumber, mode = CopyMode::PACKET, &callback)
             queue = self.new(qnumber, mode)
-            queue.process(&callback)
-            queue.destroy
+
+            begin
+                queue.process(&callback)
+            ensure
+                queue.destroy
+            end
         end
 
         private
 
         def callback_handler(qhandler, nfmsg, nfad, data) #:nodoc:
-            packet = Packet.new(nfad)
+            packet = Packet.new(self, nfad)
             verdict = @callback[packet]
       
             data = packet.data
