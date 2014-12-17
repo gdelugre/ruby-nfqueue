@@ -73,7 +73,7 @@ module Netfilter
             hdr = Header.new(phdr)
 
             @id = [ hdr[:packet_id] ].pack("N").unpack("V")[0]
-            @protocol = [ hdr[:protocol] ].pack('n').unpack("v")[0]
+            @protocol = [ hdr[:hw_protocol] ].pack('n').unpack("v")[0]
         end
 
         #
