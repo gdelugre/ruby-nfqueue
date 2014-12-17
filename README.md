@@ -8,14 +8,21 @@ For example, plugging on the #0 queue:
 ```ruby
 require 'nfqueue'
 
-system('sudo iptables -A OUTPUT -p tcp --dport 80 -j NFQUEUE --queue-num 0 --queue-bypass')
-
 Netfilter::Queue.create(0) do |packet|
   puts "Inspecting packet ##{packet.id}"
 
   p packet.data
   Netfilter::Packet::ACCEPT
 end
+```
+
+Setting up iptables
+-------------------
+
+This is an example for intercepting outgoing HTTP traffic:
+
+```
+iptables -A OUTPUT -p tcp --dport 80 -j NFQUEUE --queue-num 0 --queue-bypass
 ```
 
 Dependencies
