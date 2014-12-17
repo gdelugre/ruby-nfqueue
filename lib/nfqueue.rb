@@ -265,7 +265,24 @@ module Netfilter
                 raise QueueError, "nfq_unbind_pf has failed"
             end
 
-            @qhandle = Queue.nfq_create_queue(@conn_handle, qnumber, method(:callback_handler), nil)
+            @callback = Proc.new {|packet| raise QueueError, "Undefined callback method."}
+            @callback_handler =
+               FFI::Function.new(:int, [:pointer, :pointer, :pointer, :buffer_in]) do |qhandler, nfmsg, nfad, data|
+                    packet = Packet.new(self, nfad)
+                    verdict = @callback[packet]
+
+                    data = packet.data
+
+                    Queue.nfq_set_verdict(
+                        qhandler,
+                        packet.id,
+                        verdict,
+                        data.size,
+                        data
+                    )
+               end
+
+            @qhandle = Queue.nfq_create_queue(@conn_handle, qnumber, @callback_handler, nil)
             if @qhandle.null?
                 close
                 raise QueueError, "nfq_create_queue has failed" if @qhandle.null?
@@ -340,21 +357,6 @@ module Netfilter
         end
 
         private
-
-        def callback_handler(qhandler, nfmsg, nfad, data) #:nodoc:
-            packet = Packet.new(self, nfad)
-            verdict = @callback[packet]
-      
-            data = packet.data
-
-            Queue.nfq_set_verdict(
-                qhandler,
-                packet.id,
-                verdict,
-                data.size,
-                data
-            )
-        end
 
         def close #:nodoc:
             Queue.nfq_close(@conn_handle)
