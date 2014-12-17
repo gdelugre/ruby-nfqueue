@@ -10,7 +10,7 @@ spec = Gem::Specification.new do |s|
   s.version    = "1.0.3"
   s.author     = "Guillaume Delugré"
   s.email      = "guillaume AT security-labs DOT org"
-  s.homepage   = "http://code.google.com/p/ruby-nfqueue"
+  s.homepage   = "http://github.com/gdelugre/ruby-nfqueue"
   s.platform   = Gem::Platform::RUBY
   s.licenses   = [ "GPL" ]
   
@@ -20,7 +20,7 @@ nfqueue is a tiny wrapper around libnetfilter_queue. It allows you to very simpl
 DESC
 
   s.files             = FileList[
-    'README', 'COPYING', "{lib}/**/*", "{samples}/**/*"
+    'README.md', 'COPYING', "{lib}/**/*", "{samples}/**/*"
   ]
 
   s.require_path      = "lib"
